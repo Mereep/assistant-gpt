@@ -23,7 +23,7 @@ class SearchWebCommand(ICommand):
         return [CommandArgument(name='search_query',
                                 type=str,
                                 required=True,
-                                help='google search query'),
+                                help='search query'),
                 CommandArgument(name='language',
                                 type=str,
                                 required=False,
@@ -36,7 +36,7 @@ class SearchWebCommand(ICommand):
         q = args.pop('search_query')
         lang = args.pop('language', 'en')
         try:
-            res: list[SearchResult] = list(search(q, num_results=10, lang=lang, advanced=True))
+            res: list[SearchResult] = list(search(q, num_results=10, lang=lang, advanced=True, ))
             if len(res) == 0:
                 return "No results found for search query `{q}`.".format(q=q)
             else:

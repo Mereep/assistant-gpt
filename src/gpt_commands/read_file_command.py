@@ -25,7 +25,12 @@ class ReadFileCommand(ICommand):
     def execute(self, chat_context: ChatContext, **args) -> str:
         file_name = args.pop('file_name')
         try:
-            return chat_context.file_storage_backend.read(file_name) or f'File {file_name} not found.'
+            res = chat_context.file_storage_backend.read(file_name)
+            if res is None:
+                return "File not found."
+            if res == '':
+                return "Empty file."
+            return res
         except RepositoryAccessNotAllowedException:
             raise CommandExecutionError(
                 reason_for_bot="Not allowed to access `{}`".format(file_name),

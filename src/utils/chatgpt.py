@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import json
 import logging
-import traceback
 
 import openai
 import requests
@@ -96,6 +95,11 @@ def try_parse_response(response: str,
     """
     try:
         response = json.loads(response.strip())
+        if isinstance(response, list):
+            logger.warning(f"Response from chatgpt is a list. It may want to execute multiple commands."
+                           f" Returning only the first element.")
+            response = response[0]
+
         resp = GptResponse(
             command=response['command'],
             arguments=response['arguments'] if 'arguments' in response else response[
@@ -112,6 +116,10 @@ def try_parse_response(response: str,
             if success:
                 logger.info(f"Successfully repaired response from chatgpt to correct format.")
                 response = json.loads(response_str.strip())
+                if isinstance(response, list):
+                    logger.warning(f"Response from chatgpt is a list. It may want to execute multiple commands."
+                                   f" Returning only the first element.")
+                    response = response[0]
                 return GptResponse(
                     command=response['command'],
                     arguments=response['arguments'] if 'arguments' in response else response[
@@ -178,6 +186,10 @@ def try_repair_response(response: str, ctx: ChatContext, logger: logging.Logger)
     try:
         # if this works, we are likely done
         j = json.loads(within_brackets)
+        if isinstance(j, list):
+            logger.warning(f"Response from chatgpt is a list. It may want to execute multiple commands."
+                           f" Returning only the first element.")
+            j = j[0]
         # or not so much, though
         if 'command' in j:
             if not j['command']:
@@ -216,10 +228,14 @@ def try_repair_response(response: str, ctx: ChatContext, logger: logging.Logger)
     try:
         result = try_repair_json_using_bot(response=response, ctx=ctx, logger=logger)
         try:
-            json.loads(result)
-            return result, True
+            j = json.loads(result)
+            if isinstance(j, list):
+                logger.warning(f"Response from chatgpt is a list. It may want to execute multiple commands."
+                               f" Returning only the first element.")
+                j = j[0]
+            return json.dumps(j), True
         except:
-            logger.warning(f"Could not repair response via model, but got a sucessful respomse."
+            logger.warning(f"Could not repair response via model, but got a successful response."
                            f"Maybe another attempt will work.")
             return result, False
 
