@@ -95,6 +95,7 @@ def initiate_conversation(app_settings: AppSettings, logger: logging.Logger) -> 
             try:
                 if conversation_id:
                     conversation = load_conversation(conversation_id=conversation_id,
+                                                     logger=logger,
                                                      app_settings=app_settings)
             except Exception as e:
                 logger.error(f"Error while loading conversation {conversation_id} due to {e}.")
@@ -124,6 +125,7 @@ def initiate_conversation(app_settings: AppSettings, logger: logging.Logger) -> 
                                                                                 conversation_id=conversation_id),
                                    file_storage_backend=load_file_storage_backend(app_settings=app_settings,
                                                                                   conversation_id=conversation_id),
+                                   default_logger=logger,
                                    )
         save_conversation(ctx=conversation)
 

@@ -1,4 +1,5 @@
 import json
+import logging
 
 from datatypes.chat_context import ChatContext
 from exceptions.conversation_exception import ConversationCannotBeSavedException, ConversationNotReadableException
@@ -28,7 +29,7 @@ def save_conversation(ctx: ChatContext):
     """
     conversation_path = ctx.settings.conversation_path / ctx.conversation_id
     conversation_path.mkdir(exist_ok=True)
-    json = ctx.json(exclude={'file_storage_backend', 'key_storage_backend', 'settings'},
+    json = ctx.json(exclude={'file_storage_backend', 'key_storage_backend', 'settings', 'default_logger'},
                     indent=4, sort_keys=True,
                 )
     try:
@@ -38,11 +39,14 @@ def save_conversation(ctx: ChatContext):
         raise ConversationCannotBeSavedException(f"Couldn't save conversation due to `{str(e)}`")
 
 
-def load_conversation(conversation_id: str, app_settings: AppSettings) -> ChatContext:
+def load_conversation(conversation_id: str,
+                      app_settings: AppSettings,
+                      logger: logging.Logger) -> ChatContext:
     """ Loads a conversation from the file system
     Args:
         conversation_id: the id of the conversation to load
         app_settings: the application settings (will be used to determine the conversation path)
+        logger: the logger to use and add to the ChatContext
     """
     conversation_path = app_settings.conversation_path / conversation_id
 
@@ -56,6 +60,7 @@ def load_conversation(conversation_id: str, app_settings: AppSettings) -> ChatCo
                                                                         conversation_id=id),
                            file_storage_backend=load_file_storage_backend(app_settings=app_settings,
                                                                           conversation_id=id),
+                           default_logger=logger,
                            settings=app_settings)
 
     except Exception as e:

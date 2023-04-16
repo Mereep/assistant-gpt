@@ -28,3 +28,4 @@ general:
     # - news_api
     - read_website
     - search_web
+    - ask_ai_agent

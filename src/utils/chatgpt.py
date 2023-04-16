@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
+import traceback
 
 import openai
 import requests
@@ -19,7 +20,7 @@ _ = gettext.gettext
 open_ai_is_init = False
 
 
-def send_message(user_message: str, model: str, logger: logging.Logger) -> str:
+def send_message(user_message: str, model: str, logger: logging.Logger, custom_system_role: str | None = None) -> str:
     """
     Sends a message to the chatgpt api and returns the response.
 
@@ -27,6 +28,8 @@ def send_message(user_message: str, model: str, logger: logging.Logger) -> str:
         user_message: The message to send to the chatgpt api.
         model: The model to use for the chatgpt api.
         logger: The logger to use for logging.
+        custom_system_role: The custom system role to use for the chatgpt api.
+        if not given ChatGPT will be tuned being an Assistant.
     Returns:
         The response from the chatgpt api.
     Raises:
@@ -48,8 +51,9 @@ def send_message(user_message: str, model: str, logger: logging.Logger) -> str:
                                 'model': model,
                                 'messages': [
                                     {'role': 'system',
-                                     'content': 'Assistant is helpful, friendly and knowledgeable agent. '
-                                                'The assistant always answers exactly in the format specified.'},
+                                     'content': custom_system_role or 'Assistant is helpful, friendly and knowledgeable agent. '
+                                                                      'The assistant always answers exactly in the format specified.'
+                                                                      'The Assistant does not respond twice with the same answer.'},
                                     {'role': 'user', 'content': user_message},
                                 ],
                                 'temperature': 0.1,
@@ -124,7 +128,9 @@ def try_parse_response(response: str,
                                               ctx=ctx, logger=logger, n_attempts=n_attempts)
 
         except Exception as e:
-            logger.error(f"Error while repairing response from chatgpt due to `{e}`. Returning error response.")
+            logger.error(f"Error while repairing response from chatgpt due to `{e}`. "
+                         f"Returning error response.")
+            logger.exception(e)
             return GptResponse(command='gpt_response_error',
                                plan="try to recover the conversation",
                                steps=["Fix message", "Continue conversation where we left off"],
@@ -151,22 +157,50 @@ def try_repair_response(response: str, ctx: ChatContext, logger: logging.Logger)
         # and didn't get to return a command. So we interpret the response as an answer
         logger.info(f"Response from chatgpt did not contain a command at all. "
                     f"Will interpret it as an straight answer.")
-        return GptResponse(command=AnswerCommand.name(),
-                           plan="Recover the plan",
-                           steps=["Repair the current prompt"],
-                           # critic='This message was no valid json. Only use json as response.',
-                           arguments={'answer': response}).dict(), True
+        return str(GptResponse(command=AnswerCommand.name(),
+                               plan="Recover the plan",
+                               steps=["Repair the current prompt", "Continue conversation where we left off"],
+                               # critic='This message was no valid json. Only use json as response.',
+                               arguments={'answer': response}).dict()), True
 
     first_bracket = response.index('{')
     last_bracket = response.rindex('}')
     within_brackets = response[first_bracket:last_bracket + 1]
+    before_brackets = response[:first_bracket].strip()
+    # check if something is after the last bracket
+    if last_bracket + 1 < len(response):
+        after_brackets = response[last_bracket + 1:].strip()
+    else:
+        after_brackets = ''
+
+    dangling_text = before_brackets + '.' +after_brackets
 
     try:
         # if this works, we are likely done
-        json.loads(within_brackets)
-        return within_brackets, True
+        j = json.loads(within_brackets)
+        # or not so much, though
+        if 'command' in j:
+            if not j['command']:
+                logger.warning(f"Response from chatgpt contained an empty command. ")
+                if len(dangling_text) > 1:
+                    logger.info(f"There seems to be some dangling text. I will try using it to fix the situation.")
+                    j['command'] = before_brackets
+                    return str(GptResponse(command=AnswerCommand.name(),
+                               plan="Recover the plan",
+                               steps=["Repair the current prompt", "Continue conversation where we left off"],
+                               arguments={'answer': response}).dict()), True
+                else:
+                    logger.warning(f"Couldn't fix the empty command as there was no dangling text outside the command.")
+                    raise Exception("Empty command")
+            else:  # happy case we have a non-empty command
+                return within_brackets, True
+        if dangling_text:  # no `command` key but there is some dangling text
+            return str(GptResponse(command=AnswerCommand.name(),
+                                   plan="Recover the plan",
+                                   steps=["Repair the current prompt", "Continue conversation where we left off"],
+                                   arguments={'answer': response}).dict()), True
     except:
-        pass # keep going
+        pass  # keep going
 
     # fix for double escaped quotes (this may be wrong as json in json might be broken using this)
     if '\\"' in within_brackets:

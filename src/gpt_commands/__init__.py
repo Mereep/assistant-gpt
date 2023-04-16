@@ -13,6 +13,7 @@ from .date_command import DateCommand
 from .news_api import NewsApiCommand
 from .read_website_command import ReadWebsiteCommand
 from .search_web_command import SearchWebCommand
+from .ask_ai_agent_command import AskAiAgentCommand
 
 
 """ Available commands to be used by the LLM bot. """
@@ -29,4 +30,5 @@ GPT_COMMANDS: dict[str, typing.Type[ICommand]] = {
     NewsApiCommand.name(): NewsApiCommand,
     ReadWebsiteCommand.name(): ReadWebsiteCommand,
     SearchWebCommand.name(): SearchWebCommand,
+    AskAiAgentCommand.name(): AskAiAgentCommand,
 }

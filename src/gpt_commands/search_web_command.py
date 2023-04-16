@@ -3,9 +3,7 @@ from googlesearch import search, SearchResult
 from datatypes.chat_context import ChatContext
 from datatypes.command_argument import CommandArgument
 from exceptions.commands_execption import CommandExecutionError
-from exceptions.user_interaction import InteractionNotPossible, CouldNotGetResponse
 from gpt_commands.i_command import ICommand
-from utils.human_interaction import ask_human
 import gettext
 
 _ = gettext.gettext

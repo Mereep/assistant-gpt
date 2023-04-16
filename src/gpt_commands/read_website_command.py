@@ -29,7 +29,8 @@ class ReadWebsiteCommand(ICommand):
 
         try:
             downloaded = trafilatura.fetch_url(url)
-
+            if not downloaded:
+                return "Could not read the website. This is likely a permanent error."
             extract = trafilatura.extract(downloaded).strip()
             return f'----BEGIN WEBSITE {url}\n' + (extract or "no content") + f'\n----END WEBSITE {url}\n'
         except Exception as e:

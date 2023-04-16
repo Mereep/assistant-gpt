@@ -95,9 +95,10 @@ def generate_gpt_query(ctx: ChatContext, logger: logging.Logger) -> str:
                 command_str += 'No args.\n'
 
     # current context if available (when it is not the first message)
-    if len(ctx.message_history) > 0:
+    if len(ctx.message_history) > 0 and ctx.message_history[-1]:
         additional_info = ctx.message_history[-1].additional_info if ctx.message_history[-1].additional_info else 'None'
         current_prompt = f'User ({ctx.active_user}): ' + ctx.message_history[-1].user_response
+
     else:
         additional_info = 'None'
         current_prompt = 'None'

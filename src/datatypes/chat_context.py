@@ -1,4 +1,6 @@
 from __future__ import annotations
+
+import logging
 import uuid
 
 from pydantic import Field, BaseModel
@@ -25,6 +27,8 @@ class ChatContext(BaseModel):
     file_storage_backend: IFileStorageBackend = Field(help_text="The storage backend to use for files")
 
     settings: AppSettings = Field(help_text="The Application Settings")
+    default_logger: logging.Logger = Field(help_text="The default logger")
+
 
     class Config:
         arbitrary_types_allowed = True
