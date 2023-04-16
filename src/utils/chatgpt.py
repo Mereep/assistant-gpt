@@ -157,11 +157,11 @@ def try_repair_response(response: str, ctx: ChatContext, logger: logging.Logger)
         # and didn't get to return a command. So we interpret the response as an answer
         logger.info(f"Response from chatgpt did not contain a command at all. "
                     f"Will interpret it as an straight answer.")
-        return str(GptResponse(command=AnswerCommand.name(),
-                               plan="Recover the plan",
-                               steps=["Repair the current prompt", "Continue conversation where we left off"],
-                               # critic='This message was no valid json. Only use json as response.',
-                               arguments={'answer': response}).dict()), True
+        return json.dumps(GptResponse(command=AnswerCommand.name(),
+                                      plan="Recover the plan",
+                                      steps=["Repair the current prompt", "Continue conversation where we left off"],
+                                      # critic='This message was no valid json. Only use json as response.',
+                                      arguments={'answer': response}).dict()), True
 
     first_bracket = response.index('{')
     last_bracket = response.rindex('}')
@@ -173,7 +173,7 @@ def try_repair_response(response: str, ctx: ChatContext, logger: logging.Logger)
     else:
         after_brackets = ''
 
-    dangling_text = before_brackets + '.' +after_brackets
+    dangling_text = before_brackets + '.' + after_brackets
 
     try:
         # if this works, we are likely done
@@ -186,9 +186,10 @@ def try_repair_response(response: str, ctx: ChatContext, logger: logging.Logger)
                     logger.info(f"There seems to be some dangling text. I will try using it to fix the situation.")
                     j['command'] = before_brackets
                     return str(GptResponse(command=AnswerCommand.name(),
-                               plan="Recover the plan",
-                               steps=["Repair the current prompt", "Continue conversation where we left off"],
-                               arguments={'answer': response}).dict()), True
+                                           plan="Recover the plan",
+                                           steps=["Repair the current prompt",
+                                                  "Continue conversation where we left off"],
+                                           arguments={'answer': response}).dict()), True
                 else:
                     logger.warning(f"Couldn't fix the empty command as there was no dangling text outside the command.")
                     raise Exception("Empty command")
@@ -238,7 +239,7 @@ def try_repair_json_using_bot(response: str, ctx: ChatContext, logger: logging.L
     query = """
     The following snippet is a broken json:
     {broken_json}
-    
+
     Please repair it to valid json that could be loaded for example by Pythons json.loads function.
     Importantly: do **only** answer with a valid json structure. No other messages and no textual explanations allowed!
     """
