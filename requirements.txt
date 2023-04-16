@@ -1,0 +1,10 @@
+pydantic
+pyyaml
+openai
+halo
+requests
+rich
+tiktoken
+trafilatura
+googlesearch-python
+

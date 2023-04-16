@@ -1,0 +1,30 @@
+keys:
+  chatgpt:        # insert your chatgpt api key here
+  # insert your newsapi key here if you want to use the news_api command
+  # default is disabled (news_api command). see allowed_commands section below
+  newsapi_key:
+general:
+  model: gpt-3.5-turbo                # see: https://platform.openai.com/docs/models/
+  max_response_repairment_attempts: 3 # how often should the model try to repair its own response if broken?
+  log_level: info                     # debug < info < warning < error
+  storage_backend: file               # only file allowed at the moment
+  query_user_method: cli              # how to ask the user for something? (only cli atm)
+
+  # how much context the history have -> each model can process a different amount of tokens
+  # gpt-3.5-turbo around 4000. As this includes the answer also, this value is be a tradeoff
+  max_token_len_history: 1000   # 1 token is about 4 characters on average
+
+  # what can the bot actually do
+  allowed_commands:
+    - answer
+    - ask_human
+    - storage_read
+    - storage_write
+    - storage_delete
+    - read_file
+    - write_file
+    - list_files
+    - get_datetime
+    # - news_api
+    - read_website
+    - search_web
