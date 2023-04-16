@@ -13,7 +13,8 @@ class ReadWebsiteCommand(ICommand):
 
     @classmethod
     def description(cls) -> str:
-        return f'Reads the content of a website and returns it.'
+        return f'Reads the content of a website (http:// or https://) and returns the information. Always use this command if your' \
+               f'are asked for specific information on a web page.'
 
     @classmethod
     def arguments(cls) -> list[CommandArgument]:

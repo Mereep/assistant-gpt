@@ -129,7 +129,8 @@ def try_parse_response(response: str,
                                plan="try to recover the conversation",
                                steps=["Fix message", "Continue conversation where we left off"],
                                arguments={
-                                   'message': _('You returned an invalid response: `{response}`, which I could not fix. '
+                                   'message': _('You returned an invalid response: `{response}`, '
+                                                'which I could not fix!'
                                                 '*Always* respond in the described format!').format(response=response)})
 
 
@@ -154,7 +155,7 @@ def try_repair_response(response: str, ctx: ChatContext, logger: logging.Logger)
                            plan="Recover the plan",
                            steps=["Repair the current prompt"],
                            # critic='This message was no valid json. Only use json as response.',
-                           arguments={'answer': response}).dict()
+                           arguments={'answer': response}).dict(), True
 
     first_bracket = response.index('{')
     last_bracket = response.rindex('}')
