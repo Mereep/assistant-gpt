@@ -19,7 +19,7 @@ _ = gettext.gettext
 open_ai_is_init = False
 
 
-def send_message(user_message: str, model: str, logger: logging.Logger, custom_system_role: str | None = None) -> str:
+def send_message(user_message: str, model: str, logger: logging.Logger, system_role: str) -> str:
     """
     Sends a message to the chatgpt api and returns the response.
 
@@ -27,7 +27,7 @@ def send_message(user_message: str, model: str, logger: logging.Logger, custom_s
         user_message: The message to send to the chatgpt api.
         model: The model to use for the chatgpt api.
         logger: The logger to use for logging.
-        custom_system_role: The custom system role to use for the chatgpt api.
+        system_role: The custom system role to use for the chatgpt api.
         if not given ChatGPT will be tuned being an Assistant.
     Returns:
         The response from the chatgpt api.
@@ -50,9 +50,8 @@ def send_message(user_message: str, model: str, logger: logging.Logger, custom_s
                                 'model': model,
                                 'messages': [
                                     {'role': 'system',
-                                     'content': custom_system_role or 'Assistant is helpful, friendly and knowledgeable agent. '
-                                                                      'The assistant always answers exactly in the format specified.'
-                                                                      'The Assistant does not respond twice with the same answer.'},
+                                     'content': system_role
+                                     },
                                     {'role': 'user', 'content': user_message},
                                 ],
                                 'temperature': 0.1,

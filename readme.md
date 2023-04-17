@@ -9,6 +9,7 @@ Yes, that's a joke. AGI is far. But this is a small glimpse into the maybe-futur
 - Extend ChatGPT with new superpowers:
   - search the web
   - read specific websites
+  - read PDF files (good for researching)
   - read and write files
   - store information for later access
   - use you to do things :)

@@ -3,6 +3,14 @@ keys:
   # insert your newsapi key here if you want to use the news_api command
   # default is disabled (news_api command). see allowed_commands section below
   newsapi_key:
+
+prompt:
+  ai_task:
+  max_token_len_history: 1500   # 1 token is about 4 characters on average
+  # change this if you want your Agent to achieve a certain goal
+  ai_role: "The Assistant is helpful, friendly and knowledgeable agent The assistant always answers 
+  exactly in the format specified. The Assistant does not respond twice with the same answer."
+
 general:
   model: gpt-3.5-turbo                # see: https://platform.openai.com/docs/models/
   max_response_repairment_attempts: 3 # how often should the model try to repair its own response if broken?
@@ -13,7 +21,9 @@ general:
 
   # how much context the history have -> each model can process a different amount of tokens
   # gpt-3.5-turbo around 4000. As this includes the answer also, this value is be a tradeoff
-  max_token_len_history: 1000   # 1 token is about 4 characters on average
+
+  own_names:
+    - User
 
   # what can the bot actually do
   allowed_commands:

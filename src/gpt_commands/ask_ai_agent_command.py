@@ -30,8 +30,8 @@ class AskAiAgentCommand(ICommand):
         try:
             res = send_message(user_message=question,
                                model=chat_context.settings.model,
-                               custom_system_role="Knowledgeable Assistant that answer questions "
-                                                  "as precise as possible.",
+                               system_role="Knowledgeable Assistant that answer questions "
+                                           "as precise as possible.",
                                logger=chat_context.default_logger
                                )
             return res

@@ -62,7 +62,15 @@ class AppSettings:
 
     @property
     def max_token_len_history(self) -> int:
-        return self.yaml['general']['max_token_len_history']
+        return self.yaml['prompt']['max_token_len_history']
+
+    @property
+    def ai_default_role(self) -> str:
+        return self.yaml['prompt']['ai_default_role']
+
+    @property
+    def own_names(self) -> list[str]:
+        return list(self.yaml['general']['own_names'])
 
     def __init__(self, config_file: Path):
         self.config_file = config_file

@@ -29,6 +29,7 @@ class ChatContext(BaseModel):
 
     settings: AppSettings = Field(help_text="The Application Settings")
     default_logger: logging.Logger = Field(help_text="The default logger")
+    ai_role: str = Field(help_text="The current ai task")
 
     class Config:
         arbitrary_types_allowed = True

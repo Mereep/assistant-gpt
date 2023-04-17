@@ -46,9 +46,10 @@ Your plan was: `{plan}`!
 Your next planned steps were:
 {next_steps}!
 ---- Your Instructions ----
-Always plan your next steps carefully step by step and execute them one by one. Add the remaining 
+Always consider your next steps carefully step by step and execute them one by one. Add the remaining 
 steps you would have to do to achieve the plan to your response in the template given below. Don't put the next
-steps into an answer directly but put it in the json structure in the key `steps`.
+steps into an answer directly but put it in the json structure in the key `steps`. Use the plan to store overarching 
+information on what we are going to do.
 
 *ALWAYS* respond with a JSON object in the following exact format (given as template):
 ----BEGIN TEMPLATE---
@@ -117,7 +118,7 @@ def generate_gpt_query(ctx: ChatContext, logger: logging.Logger) -> str:
     if len(ctx.message_history) >= 2:
         msg: GptResponse = ctx.message_history[-2]
         plan = msg.plan if msg.plan else "None"
-        next_steps = msg.steps[1:] if msg.steps and len(msg.steps) > 1 else "None"
+        next_steps = msg.steps[1:] if msg.steps and len(msg.steps) > 1 else ["None"]
     else:
         plan = "Initiate a conversation"
         next_steps = ['Greet the human']

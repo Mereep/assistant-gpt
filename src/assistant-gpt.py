@@ -44,21 +44,16 @@ def initiate_conversation(app_settings: AppSettings, logger: logging.Logger) -> 
         delay=0.01,
     )
     if available_conversation_ids:
-        tell_human(_("You have the following conversations started:"), app_settings=app_settings)
-        for conv in available_conversation_ids:
-            tell_human(f"- {conv}", app_settings=app_settings)
-        load = _("no")
         try:
-            repeat = True
-            while repeat:
-                load = ask_human(_("Do you want to continue an existing conversation?"),
-                                 options=[_("yes"),
-                                          _("no")],
-                                 app_settings=app_settings
-                                 )
-                load = load.lower()
-                if load in [_("yes"), _("no")]:
-                    repeat = False
+            load = ask_human(_("Do you want to continue an existing conversation?"),
+                             prompt_cli=_("Do you want to continue an existing conversation? (y)es/(n)o)"),
+                             options=[_("yes"),
+                                      _("no"),
+                                      ],
+                             options_cli=[_("y"),_("n")],
+                             repeat_until_valid=True,
+                             app_settings=app_settings
+                             )
 
         except Exception as e:
             tell_human(_("Operation cancelled. Continuing with creating a new conversation."),
@@ -67,30 +62,30 @@ def initiate_conversation(app_settings: AppSettings, logger: logging.Logger) -> 
                          f"Assuming user wants to start a new conversation.")
             load = _("no")
 
-        if load == _("yes"):
+        if load in (_("yes"), _("y")):
             repeat = True
             conversation_id = None
-            while repeat:
-                try:
-                    conversation_id = ask_human(_("Which conversation do you want to continue? "),
-                                                options=available_conversation_ids,
-                                                app_settings=app_settings
-                                                )
+            tell_human(_("You have the following conversations started:"), app_settings=app_settings)
 
-                    if conversation_id not in available_conversation_ids:
-                        tell_human(_("This conversation {conv} does not exist. "
-                                     "Please try again.").format(conv=conversation_id),
-                                   app_settings=app_settings)
-                        repeat = True
-                    else:
-                        repeat = False
-                except Exception as e:
-                    tell_human(_("Operation cancelled. Continuing with creating a new conversation."),
-                               app_settings=app_settings)
-                    logger.error(f"Error while asking user which conversation to load due to {e}."
-                                 f"Assuming user wants to start a new conversation.")
-                    repeat = False
-                    conversation_id = None
+            # show available conversations
+            for conv in available_conversation_ids:
+                tell_human(f"- {conv}", app_settings=app_settings)
+
+            try:
+                conversation_id = ask_human(_("Which conversation do you want to continue? "),
+                                            options=available_conversation_ids,
+                                            app_settings=app_settings,
+                                            repeat_until_valid=True
+                                            )
+
+                # always lower case to make it more accessible
+                conversation_id = conversation_id.lower()
+            except Exception as e:
+                tell_human(_("Operation cancelled. Continuing with creating a new conversation."),
+                           app_settings=app_settings)
+                logger.error(f"Error while asking user which conversation to load due to {e}."
+                             f"Assuming user wants to start a new conversation.")
+                conversation_id = None
 
             try:
                 if conversation_id:
@@ -107,17 +102,17 @@ def initiate_conversation(app_settings: AppSettings, logger: logging.Logger) -> 
             conversation = None
 
     if not conversation:
-        own_name = ask_human(_("What is your name? "),
-                             style=typewrite_style,
-                             app_settings=app_settings)
+        #own_name = ask_human(_("What is your name? "),
+        #                     style=typewrite_style,
+        #                     app_settings=app_settings)
+        own_names = app_settings.own_names
         ai_name = 'assistant'
-
         conversation_id = ask_human(_("How do we want to call this conversation? (to restore it later)"),
                                     style=typewrite_style,
                                     app_settings=app_settings)
 
-        conversation = ChatContext(users=[own_name],
-                                   active_user=own_name,
+        conversation = ChatContext(users=own_names,
+                                   active_user=own_names[0],
                                    bot_name=ai_name,
                                    settings=app_settings,
                                    conversation_id=conversation_id,
@@ -126,6 +121,7 @@ def initiate_conversation(app_settings: AppSettings, logger: logging.Logger) -> 
                                    file_storage_backend=load_file_storage_backend(app_settings=app_settings,
                                                                                   conversation_id=conversation_id),
                                    default_logger=logger,
+                                   ai_role=app_settings.ai_default_role,
                                    )
         save_conversation(ctx=conversation)
 
@@ -148,9 +144,10 @@ def run_loop(conversation: ChatContext, logger: logging.Logger):
 
     app_settings = conversation.settings
 
-    tell_human(_("Hello {name}! Conversation {conv} started!").format(
-        name='and'.join(conversation.users), conv=conversation.conversation_id),
-        app_settings=conversation.settings)
+    tell_human(_("Hello {name}! Conversation {conv} started with AI role\n{role}\n").format(
+                    name='and'.join(conversation.users), conv=conversation.conversation_id, role=conversation.ai_role
+                ),
+               app_settings=conversation.settings)
 
     if conversation.message_history:
         tell_human(
@@ -181,6 +178,7 @@ def run_loop(conversation: ChatContext, logger: logging.Logger):
             try:
                 response = chatgpt.send_message(user_message=message_for_bot,
                                                 logger=logger,
+                                                system_role=conversation.ai_role,
                                                 model=conversation.settings.model)
                 spinner.stop()
 

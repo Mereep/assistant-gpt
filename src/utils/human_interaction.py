@@ -33,7 +33,9 @@ def typewriter_effect(text,
 
 def ask_human(prompt: str,
               app_settings: AppSettings,
+              prompt_cli: str | None = None,
               options: list[str] | None = None,
+              options_cli: list[str] | None = None,
               repeat_until_valid: bool = False,
               option_details: dict[str, str] | None = None,
               style: CliFormat | None = None,
@@ -42,27 +44,33 @@ def ask_human(prompt: str,
     Reads a string from the user.
     Args:
         prompt: the prompt to show the user
+        prompt_cli: the prompt to show the user on cli optionally if different from prompt
         app_settings: the application settings
-        options: the options the user can choose from (will not be checked just presented)
+        options: the options the user can choose from
         option_details: descriptions for the options (may or may not be presented)
         repeat_until_valid: if True, the user will be asked again if he entered an invalid option
+        options_cli: on cli we might want to display shorthands for the options
         style: the style to use for the prompt output
     Raises:
         InteractionNotPossible: when the communication method is not available
         CouldNotGetResponse: when the user didn't enter anything
     """
     if app_settings.user_input_prompt_method == 'cli':
+        prompt = prompt_cli or prompt
         prompt = prompt.strip()
-        if options:
-            prompt += f" ({', '.join(options)})"
+        relevant_options = options_cli or options
+        if relevant_options:
+            prompt += f" ({', '.join(relevant_options)})"
 
         tell_human(prompt, app_settings=app_settings, style=style)
         user_input = input()
-        if options and user_input not in options and repeat_until_valid:
+        if relevant_options and user_input not in relevant_options and repeat_until_valid:
             tell_human(_("Invalid option. Please try again."), app_settings=app_settings, style=style)
             return ask_human(prompt=prompt,
+                             prompt_cli=prompt_cli,
+                             options_cli=options_cli,
                              app_settings=app_settings,
-                             options=options,
+                             options=relevant_options,
                              repeat_until_valid=repeat_until_valid,
                              option_details=option_details,
                              style=style,
