@@ -13,7 +13,8 @@ class ReadWebsiteCommand(ICommand):
 
     @classmethod
     def description(cls) -> str:
-        return f'Reads the content of a website (http:// or https://) and returns the information. Always use this command if your' \
+        return f'Reads the content of a website (http:// or https://) and returns the information. ' \
+               f'Always use this command if your' \
                f'are asked for specific information on a web page.'
 
     @classmethod
@@ -30,9 +31,9 @@ class ReadWebsiteCommand(ICommand):
         try:
             downloaded = trafilatura.fetch_url(url)
             if not downloaded:
-                return "Could not read the website. This is likely a permanent error."
+                return f"Could not read the website `{url}`. This is likely a permanent error."
             extract = trafilatura.extract(downloaded).strip()
-            return f'----BEGIN WEBSITE {url}\n' + (extract or "no content") + f'\n----END WEBSITE {url}\n'
+            return f'----BEGIN WEBSITE `{url}`---- \n' + (extract or "no content") + f'\n----END WEBSITE `{url}` ---- \n'
         except Exception as e:
             raise CommandExecutionError(
                 reason_for_bot=f"Error reading website due to `{e}`",
