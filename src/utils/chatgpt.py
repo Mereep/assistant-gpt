@@ -196,12 +196,12 @@ def try_repair_response(response: str, ctx: ChatContext, logger: logging.Logger)
                 logger.warning(f"Response from chatgpt contained an empty command. ")
                 if len(dangling_text) > 1:
                     logger.info(f"There seems to be some dangling text. I will try using it to fix the situation.")
-                    j['command'] = before_brackets
-                    return str(GptResponse(command=AnswerCommand.name(),
-                                           plan="Recover the plan",
-                                           steps=["Repair the current prompt",
-                                                  "Continue conversation where we left off"],
-                                           arguments={'answer': response}).dict()), True
+                    j['command'] = dangling_text
+                    return json.dumps(GptResponse(command=AnswerCommand.name(),
+                                                  plan="Recover the plan",
+                                                  steps=["Repair the current prompt",
+                                                         "Continue conversation where we left off"],
+                                                  arguments={'answer': response}).dict()), True
                 else:
                     logger.warning(f"Couldn't fix the empty command as there was no dangling text outside the command.")
                     raise Exception("Empty command")
