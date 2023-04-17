@@ -32,5 +32,5 @@ GPT_COMMANDS: dict[str, typing.Type[ICommand]] = {
     ReadWebsiteCommand.name(): ReadWebsiteCommand,
     SearchWebCommand.name(): SearchWebCommand,
     AskAiAgentCommand.name(): AskAiAgentCommand,
-    ReadConversationHistory.name(): ReadConversationHistory
+    ReadConversationHistory.name(): ReadConversationHistory,
 }

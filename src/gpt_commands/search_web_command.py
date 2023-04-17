@@ -14,61 +14,82 @@ _ = gettext.gettext
 class SearchWebCommand(ICommand):
     @classmethod
     def name(cls) -> str:
-        return 'search_web'
+        return "search_web"
 
     @classmethod
     def description(cls) -> str:
-        return 'Search the web using Google. Will return the first search results, a link and a short description. ' \
-               'The description are mostly only an overview. You must read the website in a ' \
-               'separate step if you need more details.'
+        return (
+            "Search the web using Google. Will return the first search results, a link and a short description. "
+            "The description are mostly only an overview. You must read the website in a "
+            "separate step if you need more details."
+        )
 
     @classmethod
     def arguments(cls) -> list[CommandArgument]:
-        return [CommandArgument(name='search_query',
-                                type=str,
-                                required=True,
-                                help='search query'),
-                CommandArgument(name='language',
-                                type=str,
-                                required=False,
-                                help='language to search (e.g. "de" for German, '
-                                     '"en" for English, "fr" for French, etc. Default: "en")'),
-
-                ]
+        return [
+            CommandArgument(
+                name="search_query", type=str, required=True, help="search query"
+            ),
+            CommandArgument(
+                name="language",
+                type=str,
+                required=False,
+                help='language to search (e.g. "de" for German, '
+                '"en" for English, "fr" for French, etc. Default: "en")',
+            ),
+        ]
 
     def execute(self, chat_context: ChatContext, **args) -> str:
-        default_lang = 'en'
-        q = args.pop('search_query')
-        lang = args.pop('language', default_lang)
+        default_lang = "en"
+        q = args.pop("search_query")
+        lang = args.pop("language", default_lang)
 
         # check if the search has been conducted recently and
         # @TODO make that configurable (by time or by amount of messages passed since the query or both)
-        for index, message in chat_context.filter_chat_gpt_commands(command_name=self.name()):
-            if message.arguments['search_query'].lower().strip() == q.lower().strip():
-                old_lang = message.arguments['language'] if 'language' in message.arguments else default_lang
+        for index, message in chat_context.filter_chat_gpt_commands(
+            command_name=self.name()
+        ):
+            if message.arguments["search_query"].lower().strip() == q.lower().strip():
+                old_lang = (
+                    message.arguments["language"]
+                    if "language" in message.arguments
+                    else default_lang
+                )
                 old_lang = old_lang.strip().lower()
                 if old_lang == lang:
-                    if message.created_ts > (datetime.datetime.now().timestamp() - 60 * 60):
-                        return f"Your searched this already for query `{q}` and lang `{lang}` " \
-                               f"in message with the index number #{index} recently. " \
-                               f"The results are likely be found in the response message at index #{index+1}. " \
-                               f"Please use the information in our conversation history before searching again."
+                    if message.created_ts > (
+                        datetime.datetime.now().timestamp() - 60 * 60
+                    ):
+                        return (
+                            f"Your searched this already for query `{q}` and lang `{lang}` "
+                            f"in message with the index number #{index} recently. "
+                            f"The results are likely be found in the response message at index #{index+1}. "
+                            f"Please use the information in our conversation history before searching again."
+                        )
 
         try:
-            res: list[SearchResult] = list(search(q, num_results=10, lang=lang, advanced=True, ))
+            res: list[SearchResult] = list(
+                search(
+                    q,
+                    num_results=10,
+                    lang=lang,
+                    advanced=True,
+                )
+            )
             if len(res) == 0:
                 return "No results found for search query `{q}`.".format(q=q)
             else:
-                out = '--- BEGIN SEARCH RESULTS ---\n'
+                out = "--- BEGIN SEARCH RESULTS ---\n"
                 for i, r in enumerate(res):
                     out += f"- Result #{i+1}: {r.url}: ({r.description})\n"
-                out += '--- END SEARCH RESULTS ---'
+                out += "--- END SEARCH RESULTS ---"
 
                 return out
         except Exception as err:
             raise CommandExecutionError(
                 reason_for_bot=f"Sorry, I can't search the web at the moment.",
-                actual_reason=f"Couldn't search the web due to unknown error {err}")
+                actual_reason=f"Couldn't search the web due to unknown error {err}",
+            )
 
     @classmethod
     def needs_confirmation(cls) -> bool:

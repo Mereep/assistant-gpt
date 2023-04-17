@@ -1,2 +1,2 @@
 class CommandGptException(Exception):
-    """ Base Exception """
+    """Base Exception"""

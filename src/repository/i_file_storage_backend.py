@@ -5,7 +5,8 @@ from typing import Iterable
 
 
 class IFileStorageBackend(abc.ABC):
-    """ Storage backend for files """
+    """Storage backend for files"""
+
     @abc.abstractmethod
     def list(self) -> Iterable[str]:
         ...
@@ -42,4 +43,3 @@ class IFileStorageBackend(abc.ABC):
         Raises:
             RepositoryAccessNotAllowedException: if the key is not allowed to be accessed
         """
-

@@ -14,4 +14,4 @@ class NewsArticle:
     summary: str | None = None
 
 
-TNewsArticles = NewType('NewsArticles', list[NewsArticle])
+TNewsArticles = NewType("NewsArticles", list[NewsArticle])

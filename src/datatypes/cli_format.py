@@ -8,6 +8,5 @@ from rich.style import Style
 @dataclasses.dataclass
 class CliFormat:
     style: Style | None = None
-    delay: float = 0.
+    delay: float = 0.0
     new_line: bool = True
-

@@ -4,7 +4,10 @@ import json
 from pathlib import Path
 from typing import Iterable
 
-from exceptions.repository_exceptions import RepositoryNotReadableException, RepositoryNotWritableException
+from exceptions.repository_exceptions import (
+    RepositoryNotReadableException,
+    RepositoryNotWritableException,
+)
 from repository.i_key_storage_backend import IKeyStorageBackend
 
 
@@ -15,14 +18,18 @@ class FileKeyKeyStorageKeyBackend(IKeyStorageBackend):
         self._path = path
         if not path.exists():
             if not path.parent.is_dir():
-                raise RepositoryNotWritableException(f"Couldn't initialise storage at {path!s} "
-                                                     f"because {path.parent!s} is not a directory")
+                raise RepositoryNotWritableException(
+                    f"Couldn't initialise storage at {path!s} "
+                    f"because {path.parent!s} is not a directory"
+                )
             else:
                 try:
-                    path.write_text('{}')
+                    path.write_text("{}")
                 except Exception as e:
-                    raise RepositoryNotWritableException(f"Couldn't initialise storage at {path!s} "
-                                                         f"due to {str(e)}")
+                    raise RepositoryNotWritableException(
+                        f"Couldn't initialise storage at {path!s} " f"due to {str(e)}"
+                    )
+
     def list(self) -> Iterable[str]:
         data = self._read()
         return data.keys()
@@ -35,7 +42,9 @@ class FileKeyKeyStorageKeyBackend(IKeyStorageBackend):
             with open(self._path, "w") as file:
                 json.dump(data, file)
         except Exception as e:
-            raise RepositoryNotWritableException(f"Couldn't write to {file!s} due to {str(e)}")
+            raise RepositoryNotWritableException(
+                f"Couldn't write to {file!s} due to {str(e)}"
+            )
 
     def read(self, key: str) -> str | None:
         data = self._read()
@@ -52,7 +61,9 @@ class FileKeyKeyStorageKeyBackend(IKeyStorageBackend):
             with open(self._path, "w") as file:
                 json.dump(data, file)
         except Exception as e:
-            raise RepositoryNotWritableException(f"Couldn't delete from `{file!s}` due to `{str(e)}`")
+            raise RepositoryNotWritableException(
+                f"Couldn't delete from `{file!s}` due to `{str(e)}`"
+            )
 
     def _read(self) -> dict[str, str]:
         if not self._path.is_file():
@@ -62,6 +73,6 @@ class FileKeyKeyStorageKeyBackend(IKeyStorageBackend):
                 with open(self._path, "r") as file:
                     return json.load(file)
             except Exception as e:
-                raise RepositoryNotReadableException(f"Couldn't parse "
-                                                     f"`{file!s}` due to `{str(e)}`")
-
+                raise RepositoryNotReadableException(
+                    f"Couldn't parse " f"`{file!s}` due to `{str(e)}`"
+                )

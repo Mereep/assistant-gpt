@@ -16,16 +16,25 @@ from utils.app_settings import AppSettings
 class ChatContext(BaseModel):
     bot_name: str = Field(help_text="The name of the bot", default="Assistant")
     active_user: str = Field(help_text="The active user")
-    users: list[str] = Field(help_text="The list of users", default_factory=lambda: ["User"])
+    users: list[str] = Field(
+        help_text="The list of users", default_factory=lambda: ["User"]
+    )
 
-    conversation_id: str = Field(help_text="The id of the conversation",
-                                 default_factory=lambda: uuid.uuid4().__str__())
+    conversation_id: str = Field(
+        help_text="The id of the conversation",
+        default_factory=lambda: uuid.uuid4().__str__(),
+    )
 
-    message_history: list[GptResponse | UserMessage] = Field(help_text="The history of messages",
-                                                             default_factory=list)
+    message_history: list[GptResponse | UserMessage] = Field(
+        help_text="The history of messages", default_factory=list
+    )
 
-    key_storage_backend: IKeyStorageBackend = Field(help_text="The storage backend to use for key value pairs")
-    file_storage_backend: IFileStorageBackend = Field(help_text="The storage backend to use for files")
+    key_storage_backend: IKeyStorageBackend = Field(
+        help_text="The storage backend to use for key value pairs"
+    )
+    file_storage_backend: IFileStorageBackend = Field(
+        help_text="The storage backend to use for files"
+    )
 
     settings: AppSettings = Field(help_text="The Application Settings")
     default_logger: logging.Logger = Field(help_text="The default logger")
@@ -34,8 +43,10 @@ class ChatContext(BaseModel):
     class Config:
         arbitrary_types_allowed = True
 
-    def filter_chat_gpt_commands(self, command_name: str | None = None, skip_first: bool = True) -> Iterable[tuple[int, GptResponse]]:
-        """ gets all GptResponse message meeting all the criteria
+    def filter_chat_gpt_commands(
+        self, command_name: str | None = None, skip_first: bool = True
+    ) -> Iterable[tuple[int, GptResponse]]:
+        """gets all GptResponse message meeting all the criteria
         oldest with their message index
         :param command_name: filter for specific commands
         :param skip_first: if

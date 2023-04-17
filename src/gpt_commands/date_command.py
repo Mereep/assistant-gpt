@@ -6,14 +6,13 @@ from gpt_commands.i_command import ICommand
 
 
 class DateCommand(ICommand):
-
     @classmethod
     def name(cls) -> str:
-        return 'get_datetime'
+        return "get_datetime"
 
     @classmethod
     def description(cls) -> str:
-        return f'Provides the current date and time'
+        return f"Provides the current date and time"
 
     @classmethod
     def arguments(cls) -> list[CommandArgument]:
