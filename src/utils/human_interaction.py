@@ -89,8 +89,8 @@ def present_bot_response_command(ctx: ChatContext,
         typewriter_effect(json.dumps(bot_response.arguments), style=style_white, delay=0.00)
         typewriter_effect(_("Plan: "), style=style_green, new_line=False)
         typewriter_effect(bot_response.plan, style=style_white)
-        typewriter_effect(_("Steps: "), style=style_green, new_line=False)
-        typewriter_effect(str(bot_response.steps), style=style_white)
+        typewriter_effect(_("Steps: "), style=style_green, new_line=True)
+        typewriter_effect('\n- '.join(bot_response.steps), style=style_white)
         typewriter_effect("------------------", style=style_white, new_line=False)
         typewriter_effect("\n", new_line=False)
     else:

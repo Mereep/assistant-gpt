@@ -41,7 +41,7 @@ def initiate_conversation(app_settings: AppSettings, logger: logging.Logger) -> 
     tell_human(_("Welcome to your personal assistant!\n"), app_settings=app_settings)
     conversation: ChatContext | None = None
     typewrite_style = CliFormat(
-        delay=0.03,
+        delay=0.01,
     )
     if available_conversation_ids:
         tell_human(_("You have the following conversations started:"), app_settings=app_settings)
@@ -237,7 +237,7 @@ def run_loop(conversation: ChatContext, logger: logging.Logger):
                                               ctx=conversation)
 
                 except ArgumentMissingException as e:
-                    response = f'Argument: {e.argument} is missing for command {parsed.command}.'
+                    response = f'Argument: {e.argument} is missing for command {bot_response.command}.'
                 except ArgumentTypeException as e:
                     response = f'Argument: {e.argument} has wrong type for command ' \
                                f'(expected: {e.expected_type}) found {e.found_type} for {parsed.command}.'
