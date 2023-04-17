@@ -16,7 +16,8 @@ class SearchWebCommand(ICommand):
 
     @classmethod
     def description(cls) -> str:
-        return 'Search the web using Google. Will return the first search results, a link and a short description.'
+        return 'Search the web using Google. Will return the first search results, a link and a short description. ' \
+               'The description are mostly only an overview. You must read the website in a separate step if you need more details.'
 
     @classmethod
     def arguments(cls) -> list[CommandArgument]:
@@ -42,7 +43,7 @@ class SearchWebCommand(ICommand):
             else:
                 out = '--- BEGIN SEARCH RESULTS ---\n'
                 for i, r in enumerate(res):
-                    out += f"- Result: {i}: {r.url}: ({r.description})\n"
+                    out += f"- Result: {i+1}: {r.url}: ({r.description})\n"
                 out += '--- END SEARCH RESULTS ---'
 
                 return out
