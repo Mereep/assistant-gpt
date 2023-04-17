@@ -7,4 +7,4 @@ rich
 tiktoken
 trafilatura
 googlesearch-python
-
+pypdf

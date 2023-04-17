@@ -49,8 +49,9 @@ class SearchWebCommand(ICommand):
                 old_lang = old_lang.strip().lower()
                 if old_lang == lang:
                     if message.created_ts > (datetime.datetime.now().timestamp() - 60 * 60):
-                        return f"Your searched this already for query {q} and lang {lang} " \
+                        return f"Your searched this already for query `{q}` and lang `{lang}` " \
                                f"in message with the index number #{index} recently. " \
+                               f"The results are likely be found in the response message at index #{index+1}. " \
                                f"Please use the information in our conversation history before searching again."
 
         try:

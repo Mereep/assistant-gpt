@@ -94,18 +94,18 @@ def try_parse_response(response: str,
         if the response could not be parsed as json
     """
     try:
-        response = json.loads(response.strip())
+        response_json = json.loads(response.strip())
         if isinstance(response, list):
             logger.warning(f"Response from chatgpt is a list. It may want to execute multiple commands."
                            f" Returning only the first element.")
             response = response[0]
 
         resp = GptResponse(
-            command=response['command'],
-            arguments=response['arguments'] if 'arguments' in response else response[
-                'args'] if 'args' in response else {},
-            plan=response['plan'] if 'plan' in response else None,
-            steps=response['steps'] if 'steps' in response else [],
+            command=response_json['command'],
+            arguments=response_json['arguments'] if 'arguments' in response_json else response[
+                'args'] if 'args' in response_json else {},
+            plan=response_json['plan'] if 'plan' in response_json else None,
+            steps=response_json['steps'] if 'steps' in response_json else [],
         )
         return resp
     except Exception as e:

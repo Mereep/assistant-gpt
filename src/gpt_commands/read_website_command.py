@@ -1,8 +1,11 @@
+import requests
+
 from datatypes.chat_context import ChatContext
 from datatypes.command_argument import CommandArgument
 from exceptions.commands_execption import CommandExecutionError
 from gpt_commands.i_command import ICommand
-import trafilatura
+
+from utils.multimedia import try_extract_text
 
 
 class ReadWebsiteCommand(ICommand):
@@ -29,11 +32,25 @@ class ReadWebsiteCommand(ICommand):
         url = args.pop('url')
 
         try:
-            downloaded = trafilatura.fetch_url(url)
+            downloaded = requests.get(url, timeout=5, headers={
+                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/111.0'
+            }).content
             if not downloaded:
                 return f"Could not read the website `{url}`. This is likely a permanent error."
-            extract = trafilatura.extract(downloaded).strip()
-            return f'----BEGIN WEBSITE `{url}`---- \n' + (extract or "no content") + f'\n----END WEBSITE `{url}` ---- \n'
+
+            extract = try_extract_text(data=downloaded, ctx=chat_context)
+            if extract:
+                extract = extract.strip()
+
+                # make it shorter if it is too long
+                max_len = int(chat_context.settings.max_token_len_history // 1.5 * 4)
+                if len(extract) > max_len:
+                    # get the start and end of the document (this remains abstract and summary more likey)
+                    halfes = max_len // 2
+                    extract = extract[:halfes] + '...' + extract[-halfes:]
+                return f'----BEGIN WEBSITE `{url}`----\n' + extract + f'\n----END WEBSITE `{url}`----\n'
+            else:
+                return f"The website`{url}` has no content,"
         except Exception as e:
             raise CommandExecutionError(
                 reason_for_bot=f"Error reading website due to `{e}`",

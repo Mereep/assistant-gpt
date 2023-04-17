@@ -5,8 +5,9 @@ import logging
 import tiktoken
 
 from datatypes.chat_context import ChatContext
+from datatypes.gpt_response import GptResponse
 from datatypes.user_message import UserMessage
-from gpt_commands import GPT_COMMANDS
+
 
 query_template = """\
 The date and time when sending this message is: {curr_date}.
@@ -37,7 +38,10 @@ You should incorporate the following information for your answer if useful:
 Additional Information provided: 
 {additional_info}
 !!!! End current prompt / answer !!!!
-
+To remind you:
+You plan was: `{plan}`
+Your next plan were:
+{next_steps}
 ---- Your Instructions ----
 Plan your next steps carefully step by step and execute them one by one. Remember to add the remaining 
 steps to your response in the response template given below. 
@@ -63,6 +67,8 @@ def generate_gpt_query(ctx: ChatContext, logger: logging.Logger) -> str:
     :param logger:
     :return:
     """
+    from gpt_commands import GPT_COMMANDS
+
     storage = [*ctx.key_storage_backend.list()]
     pos = len(ctx.message_history)
     conversations = []
@@ -107,6 +113,14 @@ def generate_gpt_query(ctx: ChatContext, logger: logging.Logger) -> str:
         additional_info = 'None'
         current_prompt = 'None'
 
+    if len(ctx.message_history) >= 2:
+        msg: GptResponse = ctx.message_history[-2]
+        plan = msg.plan if msg.plan else "None"
+        next_steps = msg.steps[1:] if msg.steps and len(msg.steps) > 1 else "None"
+    else:
+        plan = "Initiate a conversation"
+        next_steps = ['Greet the human']
+
     template = query_template.format(
         ai_name=ctx.bot_name,
         human_names=ctx.users,
@@ -124,6 +138,8 @@ def generate_gpt_query(ctx: ChatContext, logger: logging.Logger) -> str:
         #                            'critic': 'Maybe they don\'t need anything.'}),
         current_prompt=current_prompt,
         additional_info=additional_info,
+        plan=plan,
+        next_steps='\n-'.join(next_steps)
     )
 
     return template
