@@ -208,10 +208,11 @@ def try_repair_response(response: str, ctx: ChatContext, logger: logging.Logger)
             else:  # happy case we have a non-empty command
                 return within_brackets, True
         if dangling_text:  # no `command` key but there is some dangling text
-            return str(GptResponse(command=AnswerCommand.name(),
-                                   plan="Recover the plan",
-                                   steps=["Repair the current prompt", "Continue conversation where we left off"],
-                                   arguments={'answer': response}).dict()), True
+            return json.dumps(GptResponse(command=AnswerCommand.name(),
+                                          plan="Recover the plan",
+                                          steps=["Repair the current prompt",
+                                                 "Continue conversation where we left off"],
+                                          arguments={'answer': response}).dict()), True
     except:
         pass  # keep going
 

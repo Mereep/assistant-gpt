@@ -12,7 +12,7 @@ class ListFilesCommand(ICommand):
 
     @classmethod
     def description(cls) -> str:
-        return 'Lists all files in the file storage.'
+        return 'Lists all files in the file storage. You can receive all files we created during the conversation.'
 
     @classmethod
     def arguments(cls) -> list[CommandArgument]:

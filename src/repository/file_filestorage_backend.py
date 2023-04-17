@@ -19,7 +19,12 @@ class FileFileStorageBackend(IFileStorageBackend):
         self._base_path = base_path
 
     def list(self) -> Iterable[str]:
-        return [f for f in glob(f'{self._base_path.absolute()}/**', recursive=True) if os.path.isfile(f)]
+        for f in glob(f'{self._base_path.absolute()}/**', recursive=True):
+            f = str(f)
+            if os.path.isfile(f):
+                # truncate the part below the base dir
+                base_path_len = len(str(self._base_path.absolute()))
+                yield f[base_path_len+1:]
 
     def put(self, key: str, value: str):
         self.check_access_policy(key)

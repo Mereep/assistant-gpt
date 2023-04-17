@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import uuid
+from typing import Iterable
 
 from pydantic import Field, BaseModel
 
@@ -29,7 +30,29 @@ class ChatContext(BaseModel):
     settings: AppSettings = Field(help_text="The Application Settings")
     default_logger: logging.Logger = Field(help_text="The default logger")
 
-
     class Config:
         arbitrary_types_allowed = True
 
+    def filter_chat_gpt_commands(self, command_name: str | None = None, skip_first: bool = True) -> Iterable[tuple[int, GptResponse]]:
+        """ gets all GptResponse message meeting all the criteria
+        oldest with their message index
+        :param command_name: filter for specific commands
+        :param skip_first: if
+        :return: tuple(message_index, GptResponse)
+        """
+        message_index = len(self.message_history) - 1
+        skipped = not skip_first
+
+        for message in reversed(self.message_history):
+            if isinstance(message, GptResponse):
+                matches = True
+                if command_name and message.command != command_name:
+                    matches = False
+
+                if matches:
+                    if not skipped:
+                        skipped = True
+                    else:
+                        yield message_index, message
+
+            message_index -= 1

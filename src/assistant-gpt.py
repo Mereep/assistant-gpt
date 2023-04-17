@@ -245,7 +245,10 @@ def run_loop(conversation: ChatContext, logger: logging.Logger):
                     response = f'Error while executing command {parsed.command} due to {e.reason_for_bot}'
                 except Exception as e:
                     response = f'Unknown Error while executing command {parsed.command} due to {e}'
-                tell_human(_("Command response: {}.").format(response),
+                tell_human(_("----BEGIN RESULT OF COMMAND `{command}`----:\n"
+                             "{response}\n"
+                             "----END RESULT OF COMMAND `{command}`----").format(response=response,
+                                                                                 command=bot_response.command),
                            app_settings=app_settings)
 
                 # Do not feed back the answer to the bot
@@ -258,7 +261,8 @@ def run_loop(conversation: ChatContext, logger: logging.Logger):
                     if app_settings.user_input_prompt_method == 'cli':
                         typewriter_effect(text='\n-> ', new_line=False, style=Style(color='green'))
                     additional_info = ask_human(_("Ready to send response. "
-                                                  "Add an additional message for {} (if you like, leave blank if no info): ").format(conversation.bot_name),
+                                                  "Add an additional message for {} (if you like, "
+                                                  "leave blank if no info): ").format(conversation.bot_name),
                                                 app_settings=app_settings)
 
                     # just convenient for people used to enter `no` instead of leaving it blank

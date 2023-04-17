@@ -41,7 +41,8 @@ Additional Information provided:
 ---- Your Instructions ----
 Plan your next steps carefully step by step and execute them one by one. Remember to add the remaining 
 steps to your response in the response template given below. 
-Make sure you write the steps you want to do to achieve the plan you make in the below given template.
+Make sure you write the remaining steps you want to do to achieve the plan you make in the 
+below given template data structure. 
 
 ALWAYS respond with a JSON object in the following exact format (given as template):
 {base_command}

@@ -14,8 +14,8 @@ class AskAiAgentCommand(ICommand):
     @classmethod
     def description(cls) -> str:
         return f'Ask an AI agent (like ChatGPT)  a question. ' \
-               f'Can to gather general information about a topic. ' \
-               f'The agent is smart by some information may be out of date'
+               f'Can to gather general information and reasoning about a topic. ' \
+               f'The agent is smart and very useful in reasoning and providing knowledge.'
 
     @classmethod
     def arguments(cls) -> list[CommandArgument]:

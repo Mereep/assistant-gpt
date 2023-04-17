@@ -25,8 +25,9 @@ general:
     - read_file
     - write_file
     - list_files
-    - get_datetime
+    # - get_datetime
     # - news_api
     - read_website
     - search_web
     - ask_ai_agent
+    - read_conversation_history
