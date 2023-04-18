@@ -4,12 +4,23 @@ keys:
   # default is disabled (news_api command). see allowed_commands section below
   newsapi_key:
 
+
 prompt:
-  ai_task:
+  default_ai_tasks:
+    default_ai_tasks:
+      - answering all questions of the humans
+      - suggesting useful next steps
+
+
+  # how much context the history have -> each model can process a different amount of tokens
+  # gpt-3.5-turbo around 4000. As this includes the answer also, this value is be a tradeoff
   max_token_len_history: 1500   # 1 token is about 4 characters on average
-  # change this if you want your Agent to achieve a certain goal
+
+  # change this if you want your Agent to act as something special (comedian, researcher, ...)
+  # describe the role somewhat specific
   ai_role: "The Assistant is helpful, friendly and knowledgeable agent The assistant always answers 
-  exactly in the format specified. The Assistant does not respond twice with the same answer."
+  exactly in the format specified. The Assistant does not respond twice with the same command. 
+  He wants to make progress."
 
 general:
   model: gpt-3.5-turbo                # see: https://platform.openai.com/docs/models/
@@ -18,9 +29,6 @@ general:
   key_storage_backend: file     # only file allowed at the moment
   file_storage_backend: file
   query_user_method: cli              # how to ask the user for something? (only cli atm)
-
-  # how much context the history have -> each model can process a different amount of tokens
-  # gpt-3.5-turbo around 4000. As this includes the answer also, this value is be a tradeoff
 
   own_names:
     - User

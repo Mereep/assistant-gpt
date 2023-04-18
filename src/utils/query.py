@@ -19,7 +19,8 @@ using the commands given to you.
 - If you can, try to answer questions on your own. 
 - Avoid executing the same command twice in a row.
 
-Your general task is to help the human(s). 
+Your general task is to help the human(s). Specifically your general goals and tasks include:
+{ai_goals}
 
 You can execute the following commands as desired: Every answer of yours has to be a JSON object invoking exactly one of those functions:
 ----BEGIN COMMANDS----
@@ -45,6 +46,7 @@ To remind you:
 Your plan was: `{plan}`!
 Your next planned steps were:
 {next_steps}!
+
 ---- Your Instructions ----
 Always consider your next steps carefully step by step and execute them one by one. Add the remaining 
 steps you would have to do to achieve the plan to your response in the template given below. Don't put the next
@@ -138,8 +140,8 @@ def generate_gpt_query(ctx: ChatContext, logger: logging.Logger) -> str:
         plan = msg.plan if msg.plan else "None"
         next_steps = msg.steps[1:] if msg.steps and len(msg.steps) > 1 else ["None"]
     else:
-        plan = "Initiate a conversation"
-        next_steps = ["Greet the human"]
+        plan = "Come up with a plan on fulfilling the goals."
+        next_steps = ["Initiate the conversation with the human(s)."]
 
     template = query_template.format(
         ai_name=ctx.bot_name,
@@ -159,7 +161,8 @@ def generate_gpt_query(ctx: ChatContext, logger: logging.Logger) -> str:
         current_prompt=current_prompt,
         additional_info=additional_info,
         plan=plan,
-        next_steps="\n-".join(next_steps),
+        next_steps='-'+'\n- '.join(next_steps),
+        ai_goals='-'+'-\n- '.join(ctx.settings.default_ai_tasks),
     )
 
     return template

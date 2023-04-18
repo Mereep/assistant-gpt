@@ -63,13 +63,15 @@ def initiate_conversation(
             load = ask_human(
                 _("Do you want to continue an existing conversation?"),
                 prompt_cli=_(
-                    "Do you want to continue an existing conversation? (y)es/(n)o)"
+                    "Do you want to continue an existing conversation? (y/n) [n]: "
                 ),
                 options=[
                     _("yes"),
                     _("no"),
                 ],
-                options_cli=[_("y"), _("n")],
+                show_options=False,
+                default_option=_("no"),
+                options_cli=[_("y"), _("n"), _("yes"), _("no")],
                 repeat_until_valid=True,
                 app_settings=app_settings,
             )
@@ -85,9 +87,7 @@ def initiate_conversation(
             )
             load = _("no")
 
-        if load in (_("yes"), _("y")):
-            repeat = True
-            conversation_id = None
+        if load in (_("yes"), _("y"), _("")):
             tell_human(
                 _("You have the following conversations started:"),
                 app_settings=app_settings,
@@ -195,13 +195,15 @@ def run_loop(conversation: ChatContext, logger: logging.Logger):
     app_settings = conversation.settings
 
     tell_human(
-        _("Hello {name}! Conversation {conv} started with AI role\n{role}\n").format(
+        _("Hello {name}! Conversation {conv} started.").format(
             name="and".join(conversation.users),
             conv=conversation.conversation_id,
-            role=conversation.ai_role,
         ),
         app_settings=conversation.settings,
     )
+
+    tell_human("The Role of the AI is given as:\n{}\n".format(conversation.ai_role),
+               app_settings=conversation.settings)
 
     if conversation.message_history:
         tell_human(
@@ -235,8 +237,9 @@ def run_loop(conversation: ChatContext, logger: logging.Logger):
                 app_settings=app_settings,
             )
             tell_human(_("Talking to AI..."), app_settings=conversation.settings)
-            spinner = Halo(text=_("Thinking..."), spinner="dots")
-            spinner.start()
+            if app_settings.user_input_prompt_method == 'cli':
+                spinner = Halo(text=_("Thinking..."), spinner="dots")
+                spinner.start()
             response: str | None = None
             try:
                 response = chatgpt.send_message(
@@ -272,15 +275,17 @@ def run_loop(conversation: ChatContext, logger: logging.Logger):
 
             if not response:
                 res = ask_human(
-                    _("Try again?"),
+                    _("Try again? (y/n) [y]"),
                     options=[_("yes"), _("no")],
+                    options_cli=[_("y"), _("n"), _("yes"), _("no")],
+                    default_option=_("yes"),
                     repeat_until_valid=True,
                     app_settings=conversation.settings,
                 )
-                if res.lower() == _("yes"):
+                if res.lower() in [_("yes"), _("y"), _("")]:
                     continue
 
-                if res.lower() == _("no"):
+                if res.lower() in [_("no"), _("n")]:
                     exit(0)
             else:
                 parsed = try_parse_response(
@@ -304,7 +309,7 @@ def run_loop(conversation: ChatContext, logger: logging.Logger):
                     app_settings=conversation.settings,
                 )
                 message = ask_human(
-                    _("Feedback to AI: "), app_settings=conversation.settings
+                    _("Feedback to AI (try bringing it back on course)): "), app_settings=conversation.settings
                 )
                 additional_info = None
             else:
@@ -340,9 +345,7 @@ def run_loop(conversation: ChatContext, logger: logging.Logger):
                 # Do not feed back the answer to the bot
                 if bot_response.command == AnswerCommand.name():
                     message = ask_human(
-                        _("You received an answer. Add a response for {}: ").format(
-                            conversation.bot_name
-                        ),
+                        _("You received an answer. You can add and response the AI: "),
                         app_settings=app_settings,
                     )
 
@@ -354,9 +357,9 @@ def run_loop(conversation: ChatContext, logger: logging.Logger):
                         )
                     additional_info = ask_human(
                         _(
-                            "Ready to send response. "
-                            "Add an additional message for {} (if you like, "
-                            "leave blank if no info): "
+                            "Your response is ready to be sent. "
+                            "Add can add an additional message for the AI. Just hit enter (or say `no`) "
+                            "if you do not want to: "
                         ).format(conversation.bot_name),
                         app_settings=app_settings,
                     )

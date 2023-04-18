@@ -32,6 +32,8 @@ def ask_human(
     prompt: str,
     app_settings: AppSettings,
     prompt_cli: str | None = None,
+    default_option: str | None = None,
+    show_options: bool = True,
     options: list[str] | None = None,
     options_cli: list[str] | None = None,
     repeat_until_valid: bool = False,
@@ -49,6 +51,8 @@ def ask_human(
         repeat_until_valid: if True, the user will be asked again if he entered an invalid option
         options_cli: on cli we might want to display shorthands for the options
         style: the style to use for the prompt output
+        show_options: if True, the options will be shown to the user
+        default_option: will be set when empty or canceled
     Raises:
         InteractionNotPossible: when the communication method is not available
         CouldNotGetResponse: when the user didn't enter anything
@@ -57,11 +61,13 @@ def ask_human(
         prompt = prompt_cli or prompt
         prompt = prompt.strip()
         relevant_options = options_cli or options
-        if relevant_options:
+        if relevant_options and show_options:
             prompt += f" ({', '.join(relevant_options)})"
 
         tell_human(prompt, app_settings=app_settings, style=style)
-        user_input = input()
+        user_input = input().strip()
+        if user_input == "" and default_option:
+            user_input = default_option
         if (
             relevant_options
             and user_input not in relevant_options
@@ -75,6 +81,8 @@ def ask_human(
             return ask_human(
                 prompt=prompt,
                 prompt_cli=prompt_cli,
+                show_options=show_options,
+                default_option=default_option,
                 options_cli=options_cli,
                 app_settings=app_settings,
                 options=relevant_options,
@@ -109,7 +117,7 @@ def present_bot_response_command(
         typewriter_effect(_("Plan: "), style=style_green, new_line=False)
         typewriter_effect(bot_response.plan, style=style_white)
         typewriter_effect(_("Steps: "), style=style_green, new_line=True)
-        typewriter_effect("\n- ".join(bot_response.steps), style=style_white)
+        typewriter_effect('- ' + '\n- '.join(bot_response.steps), style=style_white)
         typewriter_effect("------------------", style=style_white, new_line=False)
         typewriter_effect("\n", new_line=False)
     else:

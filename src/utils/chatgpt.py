@@ -354,7 +354,7 @@ def try_repair_json_using_bot(
     return send_message(user_message=query, model=ctx.settings.model, logger=logger)
 
 
-def list_models() -> dict[dict]:
+def list_models() -> dict:
     if not open_ai_is_init:
         raise ChatGptNotInitialized()
 

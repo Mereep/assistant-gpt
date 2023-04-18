@@ -69,6 +69,10 @@ class AppSettings:
         return self.yaml["prompt"]["ai_default_role"]
 
     @property
+    def default_ai_tasks(self) -> list[str]:
+        return list(self.yaml["prompt"]["default_ai_tasks"])
+
+    @property
     def own_names(self) -> list[str]:
         return list(self.yaml["general"]["own_names"])
 
