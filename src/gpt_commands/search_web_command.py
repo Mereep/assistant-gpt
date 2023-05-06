@@ -1,4 +1,5 @@
 import datetime
+import random
 
 from googlesearch import search, SearchResult
 
@@ -7,6 +8,8 @@ from datatypes.command_argument import CommandArgument
 from exceptions.commands_execption import CommandExecutionError
 from gpt_commands.i_command import ICommand
 import gettext
+
+from utils import web_search
 
 _ = gettext.gettext
 
@@ -19,9 +22,8 @@ class SearchWebCommand(ICommand):
     @classmethod
     def description(cls) -> str:
         return (
-            "Search the web using Google. Will return the first search results, a link and a short description. "
-            "The description are mostly only an overview. You must read the website in a "
-            "separate step if you need more details."
+            "Search the web using a websearch provider. Will return the first search results, "
+            "a link and a short description. "
         )
 
     @classmethod
@@ -68,14 +70,18 @@ class SearchWebCommand(ICommand):
                         )
 
         try:
-            res: list[SearchResult] = list(
-                search(
-                    q,
-                    num_results=10,
-                    lang=lang,
-                    advanced=True,
-                )
-            )
+            res = []
+            for provider in chat_context.allowed_search_providers:
+                if provider == 'google':
+                    res.extend(web_search.do_google_search(q=q, lang=lang, ctx=chat_context))
+                elif provider == 'yahoo':
+                    res.extend(web_search.do_yahoo_search(q=q, lang=lang, ctx=chat_context))
+                elif provider == 'bing':
+                    res.extend(web_search.do_bing_search(q=q, lang=lang, ctx=chat_context))
+
+                if len(res) >= chat_context.num_search_results:
+                    break
+
             if len(res) == 0:
                 return "No results found for search query `{q}`.".format(q=q)
             else:

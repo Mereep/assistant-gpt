@@ -40,6 +40,13 @@ class ChatContext(BaseModel):
     default_logger: logging.Logger = Field(help_text="The default logger")
     ai_role: str = Field(help_text="The current ai task")
 
+    num_search_results: int = Field(help_text="The number of search results", default=12)
+
+    allowed_search_providers: list[str] = Field(
+        help_text="The allowed search providers",
+        default_factory=lambda: ['bing', 'google'],
+    )
+
     class Config:
         arbitrary_types_allowed = True
 

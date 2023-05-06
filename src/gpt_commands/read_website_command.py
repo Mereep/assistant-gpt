@@ -19,9 +19,7 @@ class ReadWebsiteCommand(ICommand):
     def description(cls) -> str:
         return (
             f"Reads the content of a website and returns the information or other fetchable documents. "
-            f"Always use this command if you "
-            f"are asked for specific information on a web page or pdf document."
-            f"If the document is big it is split into multiple parts. You will be informed if this happens."
+            f"If the document is big it is split into multiple pages. "
         )
 
     @classmethod
@@ -36,7 +34,7 @@ class ReadWebsiteCommand(ICommand):
             CommandArgument(
                 name="page",
                 type=int,
-                help="the page you want to read. Default is 1.",
+                help="the page to read (if split). Default: 1.",
                 required=False,
             ),
         ]
@@ -47,7 +45,7 @@ class ReadWebsiteCommand(ICommand):
         global PAGE_CACHE
 
         try:
-            if url in PAGE_CACHE:
+            if url not in PAGE_CACHE:
                 downloaded = requests.get(
                     url,
                     timeout=5,
@@ -55,6 +53,8 @@ class ReadWebsiteCommand(ICommand):
                         "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/111.0"
                     },
                 ).content
+                if downloaded:
+                    PAGE_CACHE[url] = downloaded.decode('utf-8')
             else:
                 downloaded = PAGE_CACHE[url]
 
@@ -70,16 +70,17 @@ class ReadWebsiteCommand(ICommand):
                 max_len = int(chat_context.settings.max_token_len_history // 1.5 * 4)
                 n_pages = 1
                 if len(extract) > max_len:
-                    # get the start and end of the document (this remains abstract and summary more likey)
-                    part = extract[(page - 1) * max_len : page * max_len]
                     n_pages = len(extract) // max_len + 1
+                    extract = extract[(page - 1) * max_len : page * max_len]
                 res = (
                     f"----BEGIN WEBSITE `{url}` page #{page} of {n_pages}----\n"
-                    + extract
+                    + extract + "\n"
                     + f"\n----END WEBSITE `{url}` page #{page} of {n_pages} ----\n"
                 )
                 if n_pages > 1:
                     res += f"If you want to read the next page, please use the command with page set to{page + 1}`."
+
+                return res
             else:
                 return f"The website`{url}` has no content,"
         except Exception as e:

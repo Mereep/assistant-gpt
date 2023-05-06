@@ -32,7 +32,8 @@ class StorageWriteCommand(ICommand):
         key = args.pop("key")
         value = args.pop("value")
         chat_context.key_storage_backend.put(key, value)
-        return "Added {key} with value {value} to storage.".format(key=key, value=value)
+        value_to_show = value[:20] + "..." + value[-20:] if len(value) > 40 else value
+        return "Added {key} with value {value} to storage.".format(key=key, value=value_to_show)
 
     @classmethod
     def needs_confirmation(cls) -> bool:

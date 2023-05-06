@@ -382,7 +382,6 @@ def run_loop(conversation: ChatContext, logger: logging.Logger):
             save_conversation(ctx=conversation)
 
 
-sleep(2)  # just to not flood messages
 
 if __name__ == "__main__":
     main()
