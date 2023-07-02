@@ -39,8 +39,8 @@ def save_conversation(ctx: ChatContext):
             "settings",
             "default_logger",
         },
-        indent=4,
-        sort_keys=True,
+        # indent=4,
+        # sort_keys=True,
     )
     try:
         with open(conversation_path / "conversation.json", "w") as f:
